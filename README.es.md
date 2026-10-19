@@ -92,8 +92,12 @@ uv run python test_predict.py
 
 ### Deploy
 
-- **Kubernetes local (kind):** manifiestos en `deploy/k8s/` (ver los pasos en [README.md](README.md#6-deployment)).
-- **Nube (Fly.io):** configuración en `deploy/fly.toml`.
+- **Kubernetes local (kind):** `deploy/kind-config.yaml` y manifiestos en `deploy/k8s/` (Deployment con 2 réplicas y
+  probes en `/health`, Service ClusterIP). Pasos en [README.md](README.md#6-deployment). Evidencia del despliegue:
+
+  ![Deploy en kind](images/kind_deployment.png)
+
+- **Nube (Fly.io), opcional y no desplegado:** `fly.toml` listo para usar con una cuenta de Fly.io.
 
 ## Limitaciones
 

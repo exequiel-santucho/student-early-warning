@@ -2911,7 +2911,6 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "numpy" },
-    { name = "pandas" },
     { name = "pydantic" },
     { name = "scikit-learn" },
     { name = "uvicorn" },
@@ -2922,6 +2921,7 @@ dev = [
     { name = "jupyter" },
     { name = "matplotlib" },
     { name = "nbconvert" },
+    { name = "pandas" },
     { name = "pytest" },
     { name = "seaborn" },
     { name = "xgboost" },
@@ -2931,7 +2931,6 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.148.0" },
     { name = "numpy", specifier = "==2.3.3" },
-    { name = "pandas", specifier = "==2.3.2" },
     { name = "pydantic", specifier = ">=2.14.1" },
     { name = "scikit-learn", specifier = "==1.7.2" },
     { name = "uvicorn", specifier = ">=0.54.0" },
@@ -2942,6 +2941,7 @@ dev = [
     { name = "jupyter", specifier = ">=1.1.1" },
     { name = "matplotlib", specifier = ">=3.11.2" },
     { name = "nbconvert", specifier = ">=7.17.2" },
+    { name = "pandas", specifier = "==2.3.2" },
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "seaborn", specifier = ">=0.13.2" },
     { name = "xgboost", specifier = "==3.2.0" },

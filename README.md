@@ -98,7 +98,8 @@ See [`notebook.ipynb`](notebook.ipynb) for the EDA, feature importance, tuning a
 ├── data/                   # compact dataset (committed)
 ├── models/                 # trained model (committed)
 ├── Dockerfile
-├── deploy/                 # Kubernetes manifests and Fly.io config
+├── deploy/                 # kind cluster config and Kubernetes manifests
+├── fly.toml                # optional Fly.io deployment
 ├── pyproject.toml / uv.lock
 └── images/
 ```
@@ -112,6 +113,7 @@ The project uses [uv](https://docs.astral.sh/uv/) and Python 3.11.
 ```bash
 pip install uv          # or: curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync                 # creates .venv with the exact versions from uv.lock
+                        # (the Docker image installs only the serving dependencies: --no-dev)
 source .venv/bin/activate   # Windows: .venv\Scripts\activate  (or prefix commands with `uv run`)
 ```
 
@@ -179,8 +181,10 @@ uv run python test_predict.py
 **Kubernetes (local, with [kind](https://kind.sigs.k8s.io/))**
 
 ```bash
-kind create cluster --name early-warning
+kind create cluster --name early-warning --config deploy/kind-config.yaml
 kind load docker-image student-early-warning:v1 --name early-warning
+# if this is slow or hangs on Docker Desktop, load it from a file instead:
+#   docker save student-early-warning:v1 -o image.tar && kind load image-archive image.tar --name early-warning
 kubectl apply -f deploy/k8s/
 kubectl rollout status deployment/early-warning
 kubectl port-forward service/early-warning 9696:80
@@ -188,15 +192,24 @@ uv run python test_predict.py
 kind delete cluster --name early-warning
 ```
 
-These manifests deploy the same Docker image on a local kind cluster.
+`deploy/kind-config.yaml` raises the control-plane start-up timeout to 10 minutes (the default 4 minutes can be too
+short with Docker Desktop on Windows). The Deployment runs 2 replicas with readiness and liveness probes on `/health`.
 
-**Cloud ([Fly.io](https://fly.io))**
+Evidence of the deployment on kind (2 replicas, predictions through the Service, invalid input rejected with 422):
+
+![Deployment on kind](images/kind_deployment.png)
+
+Plain-text log: [`images/kind_deployment.txt`](images/kind_deployment.txt).
+
+**Cloud ([Fly.io](https://fly.io)) — optional, not deployed**
+
+`fly.toml` is ready for a cloud deployment with the same Docker image (it needs a Fly.io account):
 
 ```bash
 fly auth login
-fly launch --copy-config --config deploy/fly.toml --no-deploy
-fly deploy --config deploy/fly.toml
-uv run python test_predict.py https://student-early-warning.fly.dev
+fly launch --copy-config --no-deploy   # pick a unique app name if "student-early-warning" is taken
+fly deploy
+uv run python test_predict.py https://<your-app>.fly.dev
 ```
 
 ## Limitations

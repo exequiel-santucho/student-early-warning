@@ -1,9 +1,9 @@
-# fly launch --copy-config --config deploy/fly.toml --dockerfile Dockerfile
+# Optional cloud deployment:  fly launch --copy-config --no-deploy && fly deploy
 app = "student-early-warning"
 primary_region = "gru"
 
 [build]
-  dockerfile = "../Dockerfile"
+  dockerfile = "Dockerfile"
 
 [http_service]
   internal_port = 9696

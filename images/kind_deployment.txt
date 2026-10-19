@@ -1,0 +1,40 @@
+# Deployment of student-early-warning:v1 on a local kind cluster (2026-10-19)
+
+$ kind create cluster --name early-warning --config deploy/kind-config.yaml
+Creating cluster "early-warning" ...
+Set kubectl context to "kind-early-warning"
+
+$ docker save student-early-warning:v1 -o student-early-warning.tar
+$ kind load image-archive student-early-warning.tar --name early-warning
+(image loaded)
+
+$ kubectl get nodes
+NAME                          STATUS   ROLES           AGE   VERSION
+early-warning-control-plane   Ready    control-plane   17m   v1.33.1
+
+$ kubectl apply -f deploy/k8s/deployment.yaml -f deploy/k8s/service.yaml
+deployment.apps/early-warning created
+service/early-warning created
+
+$ kubectl rollout status deployment/early-warning
+Waiting for deployment "early-warning" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "early-warning" rollout to finish: 1 of 2 updated replicas are available...
+deployment "early-warning" successfully rolled out
+
+$ kubectl get pods,services -o wide
+NAME                                 READY   STATUS    RESTARTS   AGE   IP           NODE                          NOMINATED NODE   READINESS GATES
+pod/early-warning-84c89bbdc6-75bws   1/1     Running   0          42s   10.244.0.6   early-warning-control-plane   <none>           <none>
+pod/early-warning-84c89bbdc6-bnxwg   1/1     Running   0          42s   10.244.0.5   early-warning-control-plane   <none>           <none>
+
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/early-warning   ClusterIP   10.96.129.155   <none>        80/TCP    45s   app=early-warning
+service/kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP   17m   <none>
+
+$ kubectl port-forward service/early-warning 9696:80 &
+$ python test_predict.py
+health: {'status': 'ok', 'model_sha256': 'ee763ee3bf5a73fb1346e836fc999866ccabc9247189b72c71bec7436878e7ef', 'cutoff_week': 8, 'threshold': 0.336}
+engaged    -> {'at_risk_probability': 0.0504, 'at_risk': False, 'risk_level': 'low'}
+disengaged -> {'at_risk_probability': 0.9941, 'at_risk': True, 'risk_level': 'high'}
+
+$ curl -s -o /dev/null -w "%{http_code}" -X POST localhost:9696/predict -d '{"code_module": "BBB", "weekly_clicks": [1, 2]}'   # invalid input
+422

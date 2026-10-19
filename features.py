@@ -7,10 +7,12 @@ Using the same function for training and serving avoids training/serving skew.
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-import pandas as pd
+
+if TYPE_CHECKING:  # pandas is only needed to build the training set, not to serve
+    import pandas as pd
 
 CUTOFF_WEEK = 8  # default: predict with the first 8 weeks (~20% of a presentation)
 AT_RISK = {"Fail", "Withdrawn"}
@@ -63,14 +65,16 @@ def compute_features(raw: dict[str, Any]) -> dict[str, Any]:
     return features
 
 
-def build_raw_records(students: pd.DataFrame, assessments: pd.DataFrame,
-                      submissions: pd.DataFrame, cutoff_week: int = CUTOFF_WEEK
-                      ) -> tuple[list[dict[str, Any]], np.ndarray, pd.DataFrame]:
+def build_raw_records(students: "pd.DataFrame", assessments: "pd.DataFrame",
+                      submissions: "pd.DataFrame", cutoff_week: int = CUTOFF_WEEK
+                      ) -> "tuple[list[dict[str, Any]], np.ndarray, pd.DataFrame]":
     """Build raw records + target for every student still enrolled at the cut-off.
 
     Students who unregistered before the cut-off are excluded: at that point
     there is nothing left to predict.
     """
+    import pandas as pd
+
     cutoff_day = cutoff_week * 7
     keys = ["code_module", "code_presentation", "id_student"]
 
@@ -111,7 +115,9 @@ def build_raw_records(students: pd.DataFrame, assessments: pd.DataFrame,
     return records, y, meta
 
 
-def load_tables(data_dir) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def load_tables(data_dir) -> "tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]":
+    import pandas as pd
+
     return (pd.read_csv(f"{data_dir}/students.csv"),
             pd.read_csv(f"{data_dir}/assessments.csv"),
             pd.read_csv(f"{data_dir}/student_assessments.csv"))
