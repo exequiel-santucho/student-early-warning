@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: early-warning
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: early-warning
+  template:
+    metadata:
+      labels:
+        app: early-warning
+    spec:
+      containers:
+        - name: early-warning
+          image: student-early-warning:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9696
+          resources:
+            requests: {memory: "128Mi", cpu: "100m"}
+            limits: {memory: "512Mi", cpu: "500m"}
+          readinessProbe:
+            httpGet: {path: /health, port: 9696}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: {path: /health, port: 9696}
+            initialDelaySeconds: 10
+            periodSeconds: 15

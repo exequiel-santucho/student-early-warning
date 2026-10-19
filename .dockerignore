@@ -1,0 +1,10 @@
+.venv
+data
+notebook.ipynb
+images
+tests
+deploy
+.git
+__pycache__
+*.md
+!README.md

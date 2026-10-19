@@ -1,0 +1,23 @@
+{
+  "model": "DictVectorizer + StandardScaler + LogisticRegression",
+  "cutoff_week": 8,
+  "target": "final_result in {Fail, Withdrawn}",
+  "train_presentations": [
+    "2013B",
+    "2013J",
+    "2014B"
+  ],
+  "test_presentation": "2014J",
+  "params": {
+    "C": 0.1,
+    "max_iter": 2000
+  },
+  "threshold": 0.336,
+  "validation_auc": 0.8255,
+  "test_auc": 0.8031,
+  "test_f1": 0.671,
+  "n_train": 17651,
+  "n_test": 8881,
+  "scikit_learn": "1.7.2",
+  "model_sha256": "ee763ee3bf5a73fb1346e836fc999866ccabc9247189b72c71bec7436878e7ef"
+}
